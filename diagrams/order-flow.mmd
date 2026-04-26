@@ -1,0 +1,6 @@
+sequenceDiagram
+User->>API: Order
+API->>Engine: Process
+Engine->>Match: Execute
+Match->>MQ: Event
+MQ->>Account: Update
