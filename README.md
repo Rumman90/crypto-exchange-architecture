@@ -6,14 +6,23 @@ A scalable architecture reference for a crypto exchange platform using microserv
 
 ## Overview
 
-This repository demonstrates how to design a high-performance trading system with:
+This repository demonstrates the architecture of a crypto exchange system.
 
-- Real-time order processing
-- Low-latency execution
-- Scalable microservices
-- Event-driven architecture
-- Separate storage for trading and business data
-- Asynchronous balance and account updates
+The system supports multiple trading types such as:
+
+- Spot Trading (detailed in this repository)
+- Margin Trading (high-level reference)
+- Futures Trading (high-level reference)
+
+The focus of this architecture is to clearly explain **spot trading flow and system design**, while other trading types are mentioned for completeness.
+
+---
+
+## Architecture Focus
+
+This repository provides **detailed architecture for Spot Trading only**.
+
+Margin and Futures trading follow similar patterns but are not deeply covered to keep the design simple and focused.
 
 ---
 
@@ -34,13 +43,6 @@ flowchart TD
 
     Spot[Spot Trading Service]
     SpotEngine[Spot Trading Engine]
-
-    Margin[Margin Trading Service]
-    MarginEngine[Margin Trading Engine]
-
-    Future[Futures Trading Service]
-    FutureEngine[Futures Trading Engine]
-
     Matching[Matching Engine]
 
     Dynamo[(DynamoDB<br/>Orders / Matching)]
@@ -53,18 +55,10 @@ flowchart TD
     ECS --> Auth
     ECS --> Account
     ECS --> Cron
-
     ECS --> Spot
-    ECS --> Margin
-    ECS --> Future
 
     Spot --> SpotEngine
-    Margin --> MarginEngine
-    Future --> FutureEngine
-
     SpotEngine --> Matching
-    MarginEngine --> Matching
-    FutureEngine --> Matching
 
     Matching --> Dynamo
     Matching --> Rabbit
@@ -74,11 +68,7 @@ flowchart TD
     Auth --> Postgres
     Account --> Postgres
     Spot --> Postgres
-    Margin --> Postgres
-    Future --> Postgres
 
     Redis --> Auth
     Redis --> Account
     Redis --> Spot
-    Redis --> Margin
-    Redis --> Future
