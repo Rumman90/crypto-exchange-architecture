@@ -12,6 +12,8 @@ This repository demonstrates how to design a high-performance trading system wit
 - Low-latency execution
 - Scalable microservices
 - Event-driven architecture
+- Separate storage for trading and business data
+- Asynchronous balance and account updates
 
 ---
 
@@ -20,24 +22,31 @@ This repository demonstrates how to design a high-performance trading system wit
 ```mermaid
 flowchart TD
 
-    User[User]
+    User[User / Client App]
 
     APIGW[API Gateway]
     ALB[AWS Load Balancer]
-    ECS[AWS ECS]
+    ECS[AWS ECS Cluster]
 
     Auth[Auth Service]
     Account[Account Service]
     Cron[Cron Service]
 
     Spot[Spot Trading Service]
-    SpotEngine[Spot Engine]
+    SpotEngine[Spot Trading Engine]
+
+    Margin[Margin Trading Service]
+    MarginEngine[Margin Trading Engine]
+
+    Future[Futures Trading Service]
+    FutureEngine[Futures Trading Engine]
 
     Matching[Matching Engine]
 
-    Redis[(Redis)]
-    Dynamo[(DynamoDB)]
-    Rabbit[(RabbitMQ)]
+    Dynamo[(DynamoDB<br/>Orders / Matching)]
+    Postgres[(PostgreSQL<br/>Users / Wallets / Balances / Transactions)]
+    Redis[(Redis<br/>Cache)]
+    Rabbit[(RabbitMQ<br/>Async Events)]
 
     User --> APIGW --> ALB --> ECS
 
@@ -46,10 +55,30 @@ flowchart TD
     ECS --> Cron
 
     ECS --> Spot
-    Spot --> SpotEngine --> Matching
+    ECS --> Margin
+    ECS --> Future
 
-    Matching --> Redis
+    Spot --> SpotEngine
+    Margin --> MarginEngine
+    Future --> FutureEngine
+
+    SpotEngine --> Matching
+    MarginEngine --> Matching
+    FutureEngine --> Matching
+
     Matching --> Dynamo
     Matching --> Rabbit
 
     Rabbit --> Account
+
+    Auth --> Postgres
+    Account --> Postgres
+    Spot --> Postgres
+    Margin --> Postgres
+    Future --> Postgres
+
+    Redis --> Auth
+    Redis --> Account
+    Redis --> Spot
+    Redis --> Margin
+    Redis --> Future

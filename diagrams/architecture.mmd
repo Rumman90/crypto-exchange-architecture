@@ -1,2 +1,68 @@
+
+---
+
+## diagrams/architecture.mmd
+
+```md
 flowchart TD
-User --> API --> ECS --> Service --> Engine --> Matching --> DB
+
+    User[User / Client App]
+
+    APIGW[API Gateway]
+    ALB[AWS Load Balancer]
+    ECS[AWS ECS Cluster]
+
+    Auth[Auth Service]
+    Account[Account Service]
+    Cron[Cron Service]
+
+    Spot[Spot Trading Service]
+    SpotEngine[Spot Trading Engine]
+
+    Margin[Margin Trading Service]
+    MarginEngine[Margin Trading Engine]
+
+    Future[Futures Trading Service]
+    FutureEngine[Futures Trading Engine]
+
+    Matching[Matching Engine]
+
+    Dynamo[(DynamoDB<br/>Orders / Matching)]
+    Postgres[(PostgreSQL<br/>Users / Wallets / Balances / Transactions)]
+    Redis[(Redis<br/>Cache)]
+    Rabbit[(RabbitMQ<br/>Async Events)]
+
+    User --> APIGW --> ALB --> ECS
+
+    ECS --> Auth
+    ECS --> Account
+    ECS --> Cron
+
+    ECS --> Spot
+    ECS --> Margin
+    ECS --> Future
+
+    Spot --> SpotEngine
+    Margin --> MarginEngine
+    Future --> FutureEngine
+
+    SpotEngine --> Matching
+    MarginEngine --> Matching
+    FutureEngine --> Matching
+
+    Matching --> Dynamo
+    Matching --> Rabbit
+
+    Rabbit --> Account
+
+    Auth --> Postgres
+    Account --> Postgres
+    Spot --> Postgres
+    Margin --> Postgres
+    Future --> Postgres
+
+    Redis --> Auth
+    Redis --> Account
+    Redis --> Spot
+    Redis --> Margin
+    Redis --> Future

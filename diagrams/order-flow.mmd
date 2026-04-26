@@ -1,6 +1,20 @@
 sequenceDiagram
-User->>API: Order
-API->>Engine: Process
-Engine->>Match: Execute
-Match->>MQ: Event
-MQ->>Account: Update
+    participant User
+    participant API as API Gateway
+    participant Trading as Trading Service
+    participant Engine as Trading Engine
+    participant Match as Matching Engine
+    participant Dynamo as DynamoDB
+    participant MQ as RabbitMQ
+    participant Account as Account Service
+    participant PG as PostgreSQL
+
+    User->>API: Place Order
+    API->>Trading: Route Request
+    Trading->>Engine: Validate Request
+    Engine->>Match: Send Order
+    Match->>Dynamo: Read / Write Order
+    Match->>Match: Match Order
+    Match->>MQ: Publish Execution Event
+    MQ->>Account: Consume Event
+    Account->>PG: Update Wallet / Balance / Transaction
